@@ -10,9 +10,9 @@ headers = {'accept': '*/*',
 url = 'https://api.hh.ru/vacancies'
 
 
-params = {'text': 'python junior',
+params = {'text': 'инженер',
 		  'area': 1,
-		  'per_page': 20,
+		  'per_page': 100,
 		  'only_with_salary': 'true',
 		  'search_field': ('name', )}
 
@@ -23,7 +23,7 @@ mins = []
 maxes = []
 
 
-async def get_page_data(session, page):
+async def get_page_data(session, page, semaphore):
 	pars = params.copy()
 	pars.update({'page': page})
 
@@ -38,11 +38,11 @@ async def get_page_data(session, page):
 				maxes.append(sal_to)
 
 	# mins.append()
-
-	async with session.get(url, headers=headers, params=pars) as resp:
-		resp = await resp.json()
-
-		await process_page_data(resp)
+	async with semaphore:
+		async with session.get(url, headers=headers, params=pars) as resp:
+			resp = await resp.json()
+			# print(resp)
+			await process_page_data(resp)
 
 def convert_salary_currency(salaries: dict):
 	cur = salaries.get('currency', 'RUR')
@@ -52,12 +52,14 @@ def convert_salary_currency(salaries: dict):
 
 
 async def gather_tasks(n_pages):
+	semaphore = asyncio.Semaphore(7)  # Limit is 7 due to the limit of HH API
+
 	async with aiohttp.ClientSession() as session:
 		tasks = []
 
 		for page_num in range(0, n_pages):
 			# tasks.append(asyncio.create_task(get_page_data(session, page_num)))  # Actually it will work without wraping a coro into a task because gather func will schedule it as a task
-			tasks.append(asyncio.create_task(get_page_data(session, page_num)))
+			tasks.append(asyncio.create_task(get_page_data(session, page_num, semaphore)))
 
 		await asyncio.gather(*tasks)
 

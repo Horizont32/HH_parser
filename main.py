@@ -36,7 +36,7 @@ def parse_using_api(url, headers, text):
                 name = vac['name']
                 sum_sf, cnt_sf, sum_st, cnt_st, salary_from, salary_to, salary_min, salary_max = \
                     calculate_salaries(sum_sf, cnt_sf, sum_st, cnt_st, vac, currency, salary_min, salary_max)
-                print(name, salary_from, salary_to, currency)
+                # print(name, salary_from, salary_to, currency)
                 fin_list.append({'Name': name, 'Sal_from': salary_from, 'Sal_to': salary_to})
                 if salary_from:
                     mins.append(salary_from)
@@ -105,7 +105,7 @@ def calculate_salaries(sum_sf, cnt_sf, sum_st, cnt_st, vacancy, currency, sal_mi
 #     return list
 
 
-parse_using_api('https://api.hh.ru/vacancies', headers, 'junior')
+parse_using_api('https://api.hh.ru/vacancies', headers, 'инженер')
 
 # full_list = list_pages('https://api.hh.ru/vacancies', headers, 'инженер', 0, 100)
 # calculate_salaries(full_list)
